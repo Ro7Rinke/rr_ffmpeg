@@ -1,5 +1,7 @@
 const fs = require('fs');
-const Ffmpeg = require('fluent-ffmpeg')
+const Path = require('path')
+const Ffmpeg = require('fluent-ffmpeg');
+const { exit } = require('process');
 
 // let command = ffmpeg('my-file.mp4')
 
@@ -47,12 +49,11 @@ const getInputFiles = () => {
     const paths = fs.readdirSync(pathInputs)
     let files = []
 
-    for (const path of paths) {
-        const data = path.split('.')
-
+    for (const path of paths) {        
+        const type = Path.extname(`${pathInputs}/${path}`)
         files.push({
-            name: data[0],
-            type: data[1]
+            name: Path.basename(`${pathInputs}/${path}`, type),
+            type
         })
     }
 
@@ -61,7 +62,7 @@ const getInputFiles = () => {
 
 const convert = async (file) => {
     return new Promise((resolve, reject) => {
-        let command = Ffmpeg(`${pathInputs}/${file.name}.${file.type}`)
+        let command = Ffmpeg(`${pathInputs}/${file.name}${file.type}`)
             .videoCodec(videoCodec)
             .on('progress', function (progress) {
                 console.log(`Processing ${file.name}: ${progress.percent.toFixed(2)} % done`)
